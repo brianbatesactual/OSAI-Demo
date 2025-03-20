@@ -1,0 +1,21 @@
+Unmatched Event Detected:
+- Event Type: {{ EVENT_TYPE }}
+- Subtype: {{ EVENT_SUBTYPE }}
+- Timestamp: {{ CURRENT_TIMESTAMP }}
+- System: {{ ALGSYSTEM }}
+- Instance: {{ ALGINST }}
+- Client: {{ ALGCLIENT }}
+- User: {{ ALGUSER }}
+- Terminal: {{ ALGLTERM }}
+- Transaction Code: {{ ALGTCODE }}
+- Report Name: {{ ALGREPNA }}
+- Area: {{ ALGAREA }}
+- SubID: {{ ALGSUBID }}
+- Severity: {{ TXSEVERITY }}
+- Message: {{ ALGTEXT }}
+- Parameters:
+  - PARAM1: {{ PARAM1 }}
+  - PARAM2: {{ PARAM2 }}
+  - PARAM3: {{ PARAM3 }}
+  - PARAM4: {{ PARAM4 }}
+- Additional Info: {{ MSG }}

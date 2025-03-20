@@ -1,0 +1,35 @@
+name: CI/CD Pipeline for OSAI-Demo
+
+on:
+  push:
+    branches:
+      - main # Runs when code is pushed to main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: SSH into Lab and deploy
+        uses: 
+        with:
+          host: ${{ secrets.LAB_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            - name:
+              type: cloudwatch
+              orgId: 1
+              jsonData:
+                authType: default
+                defaultRegion: eu-west-2
+              secureJsonData:
+                accessKey: 'accessKey'
+                secretKey: 'secretKey'
+            

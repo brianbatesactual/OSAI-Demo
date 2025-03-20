@@ -1,0 +1,10 @@
+log
+""
+"On {ALGDATE} at {ALGTIME}, user {ALGUSER} from client {ALGCLIENT} successfully performed an RFC/CPIC logon using type '{PARAM1}' and method '{PARAM3}' on system '{ALGSYSTEM}'."
+"On {ALGDATE} at {ALGTIME}, user {ALGUSER} from client {ALGCLIENT} started the report '{PARAM1}' on system '{ALGSYSTEM}'."
+"On 20250320 at 125232, user DDIC from client 800 successfully logged on using type B and method A on system w16s24id8606."
+"On {ALGDATE} at {ALGTIME}, user {ALGUSER} from client {ALGCLIENT} initiated a transaction involving table '{PARAM1}' with activity '{PARAM2}' (authorization check: {PARAM3}) on system '{ALGSYSTEM}'."
+"On {ALGDATE} at {ALGTIME}, user {ALGUSER} from client {ALGCLIENT} triggered an event: '{ALGTEXT}' on system '{ALGSYSTEM}'."
+""
+"On {ALGDATE} at {ALGTIME}, a system event occurred: '{ALGTEXT}' on system '{ALGSYSTEM}'."
+"On {ALGDATE} at {ALGTIME}, user {ALGUSER} from client {ALGCLIENT} made changes to user master data: '{ALGTEXT}' on system '{ALGSYSTEM}'."

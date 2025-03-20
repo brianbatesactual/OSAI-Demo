@@ -1,0 +1,1 @@
+On {{ ALGDATE }} at {{ ALGTIME }}, user {{ ALGUSER }} from client {{ ALGCLIENT }} successfully logged on using type {{ PARAM1 }} and method {{ PARAM3 }} on system {{ ALGSYSTEM }}.

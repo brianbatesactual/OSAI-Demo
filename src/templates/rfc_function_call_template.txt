@@ -1,0 +1,1 @@
+On {ALGDATE} at {ALGTIME}, user {ALGUSER} from client {ALGCLIENT} successfully executed an RFC function call '{PARAM2}' in function group '{PARAM1}' on system '{ALGSYSTEM}'.

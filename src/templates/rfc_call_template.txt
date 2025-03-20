@@ -1,0 +1,1 @@
+On {{ ALGDATE }} at {{ ALGTIME }}, user {{ ALGUSER }} from client {{ ALGCLIENT }} successfully executed an RFC call to function '{{ PARAM3 }}' in function group '{{ PARAM1 }}' on system '{{ ALGSYSTEM }}'.

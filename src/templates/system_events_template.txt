@@ -1,0 +1,1 @@
+On {ALGDATE} at {ALGTIME}, a system event occurred: '{ALGTEXT}' on system '{ALGSYSTEM}'.
