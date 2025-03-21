@@ -1,10 +1,9 @@
 from templates.tmanager import TManager
 from utils.file_handler import read_json_file, write_to_csv, write_to_json
+from inputs import file_reader
 
-def process_logs(input_file, output_csv, unmatched_json, render_mode='all'):
-    logs = read_json_file(input_file)
+def process_logs(logs, output_csv, unmatched_json, render_mode='random'):
     template_manager = TManager()
-
     processed_logs = []
     unmatched_logs = []
 
@@ -63,13 +62,19 @@ def process_logs(input_file, output_csv, unmatched_json, render_mode='all'):
                 raise ValueError('Invalid render mode. Use "random" or "all".')
 
     if processed_logs:
-        fieldnames = ['log']
-        write_to_csv(output_csv, processed_logs, fieldnames)
+        # fieldnames = ['log'] v1 legacy, delete?
+        write_to_csv(output_csv, processed_logs, fieldnames=['log'])
 
     if unmatched_logs:
         write_to_json(unmatched_json, unmatched_logs)
+
 if __name__ == "__main__":
-    input_file = '../data/input_logs.json'
-    output_csv = '../data/processed_logs.csv'
-    unmatched_json = '../data/unmatched_logs.json'
-    process_logs(input_file, output_csv, unmatched_json)
+    from inputs.file_reader import read_from_default_data
+    input_file = read_from_default_data()
+    # output_csv = '../data/processed_logs.csv'
+    # unmatched_json = '../data/unmatched_logs.json'
+    process_logs(
+        input_file,
+        output_csv='data/processed_logs.csv',
+        unmatched_json='data/unmatched_logs.json'
+    )
