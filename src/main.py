@@ -1,7 +1,7 @@
 from templates.tmanager import TManager
 from utils.file_handler import read_json_file, write_to_csv, write_to_json
 
-def process_logs(input_file, output_csv, unmatched_json):
+def process_logs(input_file, output_csv, unmatched_json, render_mode='all'):
     logs = read_json_file(input_file)
     template_manager = TManager()
 
@@ -9,15 +9,15 @@ def process_logs(input_file, output_csv, unmatched_json):
     unmatched_logs = []
 
     template_map = {
-        'Dialog Logon': 'dialog_logon_template.txt',
-        'Other Events': 'other_events_template.txt',
-        'Report Start': 'report_start_template.txt',
-        'RFC Call': 'rfc_call_template.txt',
-        'RFC/CPIC Logon': 'rfc_cpic_logon_template.txt',
-        'RFC Function Call': 'rfc_function_call_template.txt',
-        'System Events': 'system_events_template.txt',
-        'Transaction Start': 'transaction_start_template.txt',
-        'User Master Changes': 'user_master_changes_template.txt',
+        'Dialog Logon': 'dialog_logon',
+        # 'Other Events': 'other_events_template.txt',
+        # 'Report Start': 'report_start_template.txt',
+        # 'RFC Call': 'rfc_call_template.txt',
+        # 'RFC/CPIC Logon': 'rfc_cpic_logon_template.txt',
+        # 'RFC Function Call': 'rfc_function_call_template.txt',
+        # 'System Events': 'system_events_template.txt',
+        # 'Transaction Start': 'transaction_start_template.txt',
+        # 'User Master Changes': 'user_master_changes_template.txt',
         
         # Map other TXSUBCLSID values to their templates
     }
@@ -48,12 +48,19 @@ def process_logs(input_file, output_csv, unmatched_json):
 
     
         template_name = template_map.get(log_entry['TXSUBCLSID'], 'default_template.txt')
-        rendered_text = template_manager.render_template(template_name, context)
-
+        
         if template_name == 'default_template.txt':
             unmatched_logs.append(log_entry)
         else:
-            processed_logs.append({'log': rendered_text})
+            if render_mode == 'random':
+                rendered_text = template_manager.render_random_template(template_name, context)
+                processed_logs.append({'log': rendered_text})
+            elif render_mode == 'all':
+                rendered_texts = template_manager.render_all_templates(template_name, context)
+                for text in rendered_texts:
+                    processed_logs.append({'log': text})
+            else:
+                raise ValueError('Invalid render mode. Use "random" or "all".')
 
     if processed_logs:
         fieldnames = ['log']
@@ -62,7 +69,7 @@ def process_logs(input_file, output_csv, unmatched_json):
     if unmatched_logs:
         write_to_json(unmatched_json, unmatched_logs)
 if __name__ == "__main__":
-    input_file = 'data/input_logs.json'
-    output_csv = 'data/processed_logs.csv'
-    unmatched_json = 'data/unmatched_logs.json'
+    input_file = '../data/input_logs.json'
+    output_csv = '../data/processed_logs.csv'
+    unmatched_json = '../data/unmatched_logs.json'
     process_logs(input_file, output_csv, unmatched_json)

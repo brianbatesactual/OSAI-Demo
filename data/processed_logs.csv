@@ -1,10 +1,7 @@
 log
-"On 20250320 at 125232, user DDIC from client 800 successfully executed an RFC call to function '/RCFUIX/SHARED_OBJ_FILL' in function group '/RCFUIX/SEARCH_GENERAL' on system 'w16s24id8606'."
-"On {ALGDATE} at {ALGTIME}, user {ALGUSER} from client {ALGCLIENT} successfully performed an RFC/CPIC logon using type '{PARAM1}' and method '{PARAM3}' on system '{ALGSYSTEM}'."
-"On {ALGDATE} at {ALGTIME}, user {ALGUSER} from client {ALGCLIENT} started the report '{PARAM1}' on system '{ALGSYSTEM}'."
 "On 20250320 at 125232, user DDIC from client 800 successfully logged on using type B and method A on system w16s24id8606."
-"On {ALGDATE} at {ALGTIME}, user {ALGUSER} from client {ALGCLIENT} initiated a transaction involving table '{PARAM1}' with activity '{PARAM2}' (authorization check: {PARAM3}) on system '{ALGSYSTEM}'."
-"On 20250320 at 124427, user PC-BATCH from client 800 triggered an event: RAL Log Access: Action: R on system w16s24id8606."
-"On {ALGDATE} at {ALGTIME}, user {ALGUSER} from client {ALGCLIENT} successfully executed an RFC function call '{PARAM2}' in function group '{PARAM1}' on system '{ALGSYSTEM}'."
-"On {ALGDATE} at {ALGTIME}, a system event occurred: '{ALGTEXT}' on system '{ALGSYSTEM}'."
-"On {ALGDATE} at {ALGTIME}, user {ALGUSER} from client {ALGCLIENT} made changes to user master data: '{ALGTEXT}' on system '{ALGSYSTEM}'."
+User DDIC from client 800 accessed the system w16s24id8606 on 20250320 at 125232 using type B and method A.
+"At 125232 on 20250320, user DDIC from client 800 initiated a logon to system w16s24id8606 employing type B and method A."
+System w16s24id8606 was accessed by user DDIC from client 800 on 20250320 at 125232 via type B and method A.
+"On 20250320 at 125232, user DDIC (client 800) logged into system w16s24id8606 using type B and method A."
+"On 20250320 at 125232, user DDIC from client 800 successfully logged on using type B and method A on system w16s24id8606."
