@@ -2,11 +2,18 @@ import argparse
 from templates.tmanager import TManager
 from utils.file_handler import write_to_csv, write_to_json
 from inputs import file_reader, stream_reader
+from utils.exporter import export_sentence_pairs
+from sentence_transformers import SentenceTransformer, util
 
-def process_logs(logs, output_csv, unmatched_json, render_mode='random'):
+# model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# score = util.cos_sim(model.encode(sent1), model.encode(sent2))
+
+def process_logs(logs, output_csv, unmatched_json, render_mode=args.render_mode, generate_sbert=args.generate_sbert_data):
     template_manager = TManager()
     processed_logs = []
     unmatched_logs = []
+    sbert_pairs = []
 
     template_map = {
         'Dialog Logon': 'dialog_logon',
@@ -57,16 +64,24 @@ def process_logs(logs, output_csv, unmatched_json, render_mode='random'):
                 processed_logs.append({'log': rendered_text})
             elif render_mode == 'all':
                 rendered_texts = template_manager.render_all_templates(template_name, context)
-                for text in rendered_texts:
-                    processed_logs.append({'log': text})
+                processed_logs.extend([{'log': t} for t in rendered_texts])
+
+                if generate_sbert:
+                    base = rendered_texts[0]
+                    for variation in rendered_texts[1:]:
+                        sbert_pairs.append((base, variation, 1.0)) # all variations are highly similar
+                # rendered_texts = template_manager.render_all_templates(template_name, context)
+                # for text in rendered_texts:
+                    # processed_logs.append({'log': text})
             else:
                 raise ValueError('Invalid render mode. Use "random" or "all".')
 
+    if generate_sbert:
+        export_sentence_pairs(sbert_pairs)
+        print(f'Exported {len(sbert_pairs)} SBERT training pairs to data/sbert_training_pairs.csv.')
+
     if processed_logs:
         # fieldnames = ['log'] v1 legacy, delete?
-        print(f"Appending to {output_csv}")
-        print(f"Data: {[{'log': rendered}]}")
-        print(f"Fieldnames: {fieldnames}")
         write_to_csv(output_csv, processed_logs, fieldnames=['log'])
 
     if unmatched_logs:
@@ -112,7 +127,8 @@ if __name__ == "__main__":
     parser.add_argument('--render-mode', choices=['random', 'all'], default='random', help='Template render mode: "random" or "all"')
     parser.add_argument('--output', type=str, default='data/processed_logs.csv', help='Path to output CSV file.')
     parser.add_argument('--unmatched', type=str, default='data/unmatched_json.csv', help='Path to unmatched JSON file.')
-    
+    parser.add_argument('--generate-sbert-data', action='store_true', help='Export sentence pairs for SBERT fine-tuning.')
+
     args = parser.parse_args()
 
     if args.mode == 'stream':
