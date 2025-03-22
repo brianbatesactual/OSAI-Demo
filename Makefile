@@ -41,3 +41,8 @@ freeze:
 
 clean:
 	rm -rf __pycache__ env/ data/*.csv data/*.json
+
+similarity:
+	@read -p "Sentence 1: " s1; \
+	read -p "Sentence 2: " s2; \
+	PYTHONPATH=src $(PYTHON) -c "from utils.similarity import get_similarity_score; print(f'Score: {get_similarity_score(\"$$s1\", \"$$s2\")}')"

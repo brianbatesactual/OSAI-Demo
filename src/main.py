@@ -4,6 +4,7 @@ from utils.file_handler import write_to_csv, write_to_json
 from inputs import file_reader, stream_reader
 from utils.exporter import export_sentence_pairs
 from sentence_transformers import SentenceTransformer, util
+from utils.similarity import get_similarity_score
 
 # model = SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -69,7 +70,8 @@ def process_logs(logs, output_csv, unmatched_json, render_mode=args.render_mode,
                 if generate_sbert:
                     base = rendered_texts[0]
                     for variation in rendered_texts[1:]:
-                        sbert_pairs.append((base, variation, 1.0)) # all variations are highly similar
+                        sim_score = get_similarity_score(base, variation)
+                        sbert_pairs.append((base, variation, sim_score)) # all variations are highly similar
                 # rendered_texts = template_manager.render_all_templates(template_name, context)
                 # for text in rendered_texts:
                     # processed_logs.append({'log': text})
