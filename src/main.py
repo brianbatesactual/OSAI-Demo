@@ -5,12 +5,15 @@ from inputs import file_reader, stream_reader
 from utils.exporter import export_sentence_pairs
 from sentence_transformers import SentenceTransformer, util
 from utils.similarity import get_similarity_score
+from utils.logger import setup_logger
+
+logger = setup_logger()
 
 # model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # score = util.cos_sim(model.encode(sent1), model.encode(sent2))
 
-def process_logs(logs, output_csv, unmatched_json, render_mode=args.render_mode, generate_sbert=args.generate_sbert_data):
+def process_logs(logs, output_csv, unmatched_json, render_mode='random', generate_sbert=False):
     template_manager = TManager()
     processed_logs = []
     unmatched_logs = []
@@ -89,7 +92,7 @@ def process_logs(logs, output_csv, unmatched_json, render_mode=args.render_mode,
     if unmatched_logs:
         write_to_json(unmatched_json, unmatched_logs)
 
-def process_stream():
+def process_stream(output_csv='data/streamed_logs.csv', unmatched_json='data/unmatched_streamed.json', render_mode='random'):
     template_manager = TManager()
     template_map = {
         'Dialog Logon': 'dialog_logon',
@@ -123,6 +126,9 @@ def process_stream():
         write_to_json('data/unmatched_streamed.json', unmatched_logs)
 
 if __name__ == "__main__":
+    from inputs.file_reader import read_from_default_data
+
+    # parse arguments
     parser = argparse.ArgumentParser(description='Process logs using templates.')
     parser.add_argument('--input-file', type=str, help='Path to input JSON file.')
     parser.add_argument('--mode', choices=['file', 'stream'], default='file', help='Input mode: "file" or "stream"')
@@ -130,17 +136,32 @@ if __name__ == "__main__":
     parser.add_argument('--output', type=str, default='data/processed_logs.csv', help='Path to output CSV file.')
     parser.add_argument('--unmatched', type=str, default='data/unmatched_json.csv', help='Path to unmatched JSON file.')
     parser.add_argument('--generate-sbert-data', action='store_true', help='Export sentence pairs for SBERT fine-tuning.')
-
     args = parser.parse_args()
 
-    if args.mode == 'stream':
-        process_stream()
+    # file mode
+    if args.mode == 'file':
+        logs = read_from_default_data()
+        process_logs(
+            logs,
+            args.output,
+            args.unmatched,
+            render_mode=args.render_mode,
+            generate_sbert=args.generate_sbert_data
+        )
+
+    # stream mode
+    elif args.mode == 'stream':
+        process_stream(
+            output_csv=args.output,
+            unmatched_json=args.unmatched,
+            render_mode=args.render_mode
+        )
     else:
         if args.input_file:
             logs = file_reader.read_json_lines(args.input_file)
         else:
             logs = file_reader.read_from_default_data()
-        process_logs(logs, args.output, args.unmatched, render_mode=args.render_mode)
+        process_stream(logs, args.output, args.unmatched, render_mode=args.render_mode)
     
     # from inputs.file_reader import read_from_default_data
     # input_file = read_from_default_data()
