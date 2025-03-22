@@ -1,6 +1,7 @@
 # src/utils/file_handler.py
 import json
 import csv
+import os
 
 def read_json_file(file_path):
     data =[]
@@ -11,9 +12,14 @@ def read_json_file(file_path):
         return data
 
 def write_to_csv(file_path, data, fieldnames):
-    with open(file_path, 'w', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writeheader()
+    file_exists = os.path.isfile(file_path)
+    
+    with open(file_path, 'a', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        
+        if not file_exists:
+            writer.writeheader()
+        
         writer.writerows(data)
 
 def write_to_json(file_path, data):
