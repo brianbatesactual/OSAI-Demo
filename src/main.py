@@ -1,11 +1,13 @@
 import argparse
 from templates.tmanager import TManager
 from utils.file_handler import write_to_csv, write_to_json
-from inputs import file_reader, stream_reader
+from inputs import file_reader
+from inputs.stream_reader import read_from_stdin
 from utils.exporter import export_sentence_pairs
 from sentence_transformers import SentenceTransformer, util
 from utils.similarity import get_similarity_score
 from utils.logger import setup_logger
+import logging
 
 logger = setup_logger()
 
@@ -14,6 +16,7 @@ logger = setup_logger()
 # score = util.cos_sim(model.encode(sent1), model.encode(sent2))
 
 def process_logs(logs, output_csv, unmatched_json, render_mode='random', generate_sbert=False):
+    logger.info(f"🔧 Processing {len(logs)} log entries")
     template_manager = TManager()
     processed_logs = []
     unmatched_logs = []
@@ -61,20 +64,28 @@ def process_logs(logs, output_csv, unmatched_json, render_mode='random', generat
         template_name = template_map.get(log_entry['TXSUBCLSID'], 'default_template.txt')
         
         if template_name == 'default_template.txt':
+            logger.warning(f"TXSUBCLSID '{log_entry.get('TXSUBCLSID')}' not found. Using default template.")
             unmatched_logs.append(log_entry)
+            logger.warning(f"⚠️ {len(unmatched_logs)} unmatched logs written to {unmatched_json}")
+
         else:
             if render_mode == 'random':
                 rendered_text = template_manager.render_random_template(template_name, context)
                 processed_logs.append({'log': rendered_text})
+                logger.info(f"✅ Rendered {len(processed_logs)} logs")
+            
             elif render_mode == 'all':
                 rendered_texts = template_manager.render_all_templates(template_name, context)
                 processed_logs.extend([{'log': t} for t in rendered_texts])
+                logger.info(f"✅ Rendered {len(processed_logs)} logs")
 
                 if generate_sbert:
                     base = rendered_texts[0]
                     for variation in rendered_texts[1:]:
                         sim_score = get_similarity_score(base, variation)
                         sbert_pairs.append((base, variation, sim_score)) # all variations are highly similar
+                        logger.info(f"📊 Generated {len(sbert_pairs)} SBERT training pairs")
+
                 # rendered_texts = template_manager.render_all_templates(template_name, context)
                 # for text in rendered_texts:
                     # processed_logs.append({'log': text})
@@ -102,8 +113,10 @@ def process_stream(output_csv='data/streamed_logs.csv', unmatched_json='data/unm
     output_csv = 'data/streamed_logs.csv'
     unmatched_logs = []
     fieldnames = ['log']
+    rendered_count = 0
 
-    for log_entry in stream_reader.read_from_stdin():
+    for log_entry in read_from_stdin():
+        # logger.debug(f"📥 Received line: {json.dumps(line)}")
         context = {
             'ALGDATE': log_entry.get('ALGDATE', ''),
             'ALGTIME': log_entry.get('ALGTIME', ''),
@@ -117,13 +130,20 @@ def process_stream(output_csv='data/streamed_logs.csv', unmatched_json='data/unm
 
         template_name = template_map.get(log_entry.get('TXSUBCLSID'), 'default_template.txt')
         if template_name == 'default_template.txt':
+            logger.warning(f"TXSUBCLSID '{log_entry.get('TXSUBCLSID')}' not found. Using default template.")
             unmatched_logs.append(log_entry)
         else:
             rendered = template_manager.render_random_template(template_name, context)
             write_to_csv(output_csv, [{'log': rendered}], fieldnames)
+            rendered_count += 1
+            logger.info(f"✅ Rendered log with template: {template_name}")
+
+    logger.info(f"📝 Stream ended. {rendered_count} logs written to {output_csv}")
+
 
     if unmatched_logs:
         write_to_json('data/unmatched_streamed.json', unmatched_logs)
+        logger.warning(f"⚠️ {len(unmatched_logs)} unmatched logs saved to {unmatched_json}")
 
 if __name__ == "__main__":
     from inputs.file_reader import read_from_default_data
@@ -136,11 +156,20 @@ if __name__ == "__main__":
     parser.add_argument('--output', type=str, default='data/processed_logs.csv', help='Path to output CSV file.')
     parser.add_argument('--unmatched', type=str, default='data/unmatched_json.csv', help='Path to unmatched JSON file.')
     parser.add_argument('--generate-sbert-data', action='store_true', help='Export sentence pairs for SBERT fine-tuning.')
+    parser.add_argument('--log-level', default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], help='Set logging level (default: INFO).')
+    
     args = parser.parse_args()
+
+    logger = setup_logger(level=getattr(logging, args.log_level.upper()))
+    
+    logger.info("Starting osai pipeline...")
+    logger.info(f"Mode: {args.mode} | Render mode: {args.render_mode} | SBERT Data: {args.generate_sbert_data}")
 
     # file mode
     if args.mode == 'file':
+        logger.info("📁 File mode selected. Reading logs from default data path.")
         logs = read_from_default_data()
+        logger.info(f"Loaded {len(logs)} logs from input file.")
         process_logs(
             logs,
             args.output,
@@ -151,11 +180,13 @@ if __name__ == "__main__":
 
     # stream mode
     elif args.mode == 'stream':
+        logger.info("🌊 Stream mode selected. Waiting for NSJSON from standard input.")
         process_stream(
             output_csv=args.output,
             unmatched_json=args.unmatched,
             render_mode=args.render_mode
         )
+        
     else:
         if args.input_file:
             logs = file_reader.read_json_lines(args.input_file)

@@ -1,10 +1,24 @@
 import sys
 import json
+from utils.logger import setup_logger
+logger = setup_logger(__name__)
 
 def read_from_stdin():
-    print("Listening for JSON log events via stdin...")
+    logger.info("Listening for NDJSON input (Ctrl+D to end)...")
     for line in sys.stdin:
-        try:
-            yield json.loads(line.strip())
-        except json.JSONDecodeError:
+        line = line.strip()
+        if not line:
             continue
+        
+        logger.debug(f"📥 Received line: {line}")
+        
+        try:
+            yield json.loads(line)
+        except json.JSONDecodeError as e:
+            logger.warning(f"❌ Invalid JSON input: {e}")
+            continue
+        
+        # try:
+        #     yield json.loads(line.strip())
+        # except json.JSONDecodeError:
+        #     continue
