@@ -1,6 +1,9 @@
 from jinja2 import Environment, FileSystemLoader
 import os
 import random
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 class TManager:
     def __init__(self, template_dir=None):
@@ -12,6 +15,15 @@ class TManager:
 
     def get_template_variations(self, template_name):
         template_path = os.path.join(self.template_dir, template_name)
+        # try:
+        #     variations = [f for f in os.listdir(template_path) if f.endswith('.j2')]
+        #     if not variations:
+        #         logger.warning(f"No template variations found in '{template_name}'.")
+        #     else:
+        #         logger.debug(f"Found {len(variations)} variations for '{template_name}'.")
+        # except FileNotFoundError:
+        #     logger.error(f"Template path not found: '{template_path}'.")
+        #     return variations
         if not os.path.exists(template_path):
             raise FileNotFoundError(f"The directory '{template_name}' is not found.")
         return [f for f in os.listdir(template_path) if f.endswith('.j2')]
