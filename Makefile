@@ -6,6 +6,7 @@ LOG_LEVEL ?= INFO
 INPUT ?= data/input_logs.json
 OUTPUT ?= data/processed_logs.csv
 UNMATCHED ?= data/unmatched_logs.json
+SBERT_OUT ?= data/training/sentence_pairs.csv
 
 # --------- COMMANDS ---------
 .PHONY: help setup run stream test clean freeze retrain
@@ -35,7 +36,15 @@ stream:
 	$(PYTHON) src/main.py --mode stream --log-level $(LOG_LEVEL)
 
 retrain:
-	$(PYTHON) src/main.py --render-mode all --generate-sbert-data --input $(INPUT) --output $(OUTPUT) --unmatched $(UNMATCHED) --log-level $(LOG_LEVEL)
+	$(PYTHON) src/main.py \
+		--mode file \
+		--render-mode all \
+		--generate-sbert-data \
+		--input $(INPUT) \
+		--output $(SBERT_OUT) \
+		--unmatched $(UNMATCHED) \
+		--log-level $(LOG_LEVEL)
+	@echo "📦 SBERT data available at: $(SBERT_OUT)"
 
 test:
 	$(PYTHON) -c "from sentence_transformers import SentenceTransformer; m = SentenceTransformer('all-MiniLM-L6-v2'); print(m.encode('hello')[:5])"

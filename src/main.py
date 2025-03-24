@@ -84,7 +84,7 @@ def process_logs(logs, output_csv, unmatched_json, render_mode='random', generat
                     for variation in rendered_texts[1:]:
                         sim_score = get_similarity_score(base, variation)
                         sbert_pairs.append((base, variation, sim_score)) # all variations are highly similar
-                        logger.info(f"📊 Generated {len(sbert_pairs)} SBERT training pairs")
+                logger.info(f"📊 Generated {len(sbert_pairs)} SBERT training pairs")
 
                 # rendered_texts = template_manager.render_all_templates(template_name, context)
                 # for text in rendered_texts:
@@ -94,7 +94,7 @@ def process_logs(logs, output_csv, unmatched_json, render_mode='random', generat
 
     if generate_sbert:
         export_sentence_pairs(sbert_pairs)
-        print(f'Exported {len(sbert_pairs)} SBERT training pairs to data/sbert_training_pairs.csv.')
+        logger.info(f'📦 Exported {len(sbert_pairs)} SBERT training pairs to data/sbert_training_pairs.csv.')
 
     if processed_logs:
         # fieldnames = ['log'] v1 legacy, delete?
