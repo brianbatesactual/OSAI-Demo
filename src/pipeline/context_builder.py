@@ -1,0 +1,1 @@
+# Builds the context dict from log fields

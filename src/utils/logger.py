@@ -1,3 +1,5 @@
+# Sets up logger and levels across all modules
+
 import logging
 
 def setup_logger(name='osai', level=logging.INFO):

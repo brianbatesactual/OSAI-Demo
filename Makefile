@@ -71,7 +71,7 @@ clean:
 	rm -rf env data/*.csv data/*.json __pycache__ src/**/__pycache__ .pytest_cache
 
 # ---------- Nuke 'em Rico ----------
-reset:
+nuke:
 	@read -p "🚨 Are you sure you want to nuke? (y/n)" yn; \
 	if [ $$yn = "y" ]; then \
 		@echo "💥 Nuking environment and project data..."; \
