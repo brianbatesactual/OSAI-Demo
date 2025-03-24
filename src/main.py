@@ -146,11 +146,12 @@ def process_stream(output_csv='data/streamed_logs.csv', unmatched_json='data/unm
         logger.warning(f"⚠️ {len(unmatched_logs)} unmatched logs saved to {unmatched_json}")
 
 if __name__ == "__main__":
-    from inputs.file_reader import read_from_default_data
+    from inputs.file_reader import read_from_default_data, read_json_lines
 
     # parse arguments
     parser = argparse.ArgumentParser(description='Process logs using templates.')
     parser.add_argument('--input-file', type=str, help='Path to input JSON file.')
+    parser.add_argument('--input', type=str, default='data/input_logs.json', help='Path to input log file')
     parser.add_argument('--mode', choices=['file', 'stream'], default='file', help='Input mode: "file" or "stream"')
     parser.add_argument('--render-mode', choices=['random', 'all'], default='random', help='Template render mode: "random" or "all"')
     parser.add_argument('--output', type=str, default='data/processed_logs.csv', help='Path to output CSV file.')
@@ -167,8 +168,8 @@ if __name__ == "__main__":
 
     # file mode
     if args.mode == 'file':
-        logger.info("📁 File mode selected. Reading logs from default data path.")
-        logs = read_from_default_data()
+        logger.info(f"📁 File mode selected. Reading logs from {args.input}")
+        logs = read_json_lines(args.input)
         logger.info(f"Loaded {len(logs)} logs from input file.")
         process_logs(
             logs,
@@ -180,7 +181,7 @@ if __name__ == "__main__":
 
     # stream mode
     elif args.mode == 'stream':
-        logger.info("🌊 Stream mode selected. Waiting for NSJSON from standard input.")
+        logger.info(f"🌊 Stream mode selected. Waiting for NSJSON from standard input.")
         process_stream(
             output_csv=args.output,
             unmatched_json=args.unmatched,

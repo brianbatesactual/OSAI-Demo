@@ -1,5 +1,7 @@
 import os
 import json
+from utils.logger import setup_logger
+logger = setup_logger(__name__)
 
 def read_from_default_data(file_name='input_logs.json'):
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -9,6 +11,9 @@ def read_from_default_data(file_name='input_logs.json'):
 
 def read_json_lines(file_path):
     logs = []
+    if not os.path.exists(file_path):
+        logger.error(f"File not found: {file_path}")
+        raise FileNotFoundError(f"File not found: {file_path}")
     with open(file_path, 'r') as f:
         for line in f:
             try:

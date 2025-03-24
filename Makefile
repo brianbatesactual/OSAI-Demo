@@ -3,6 +3,9 @@ VENV_DIR := env
 PYTHON := $(VENV_DIR)/bin/python
 PIP := $(VENV_DIR)/bin/pip
 LOG_LEVEL ?= INFO
+INPUT ?= data/input_logs.json
+OUTPUT ?= data/processed_logs.csv
+UNMATCHED ?= data/unmatched_logs.json
 
 # --------- COMMANDS ---------
 .PHONY: help setup run stream test clean freeze retrain
@@ -26,22 +29,19 @@ setup:
 	$(PIP) install -r requirements.txt
 
 run:
-	$(PYTHON) src/main.py --render-mode random --log-level $(LOG_LEVEL)
+	$(PYTHON) src/main.py --render-mode random --input $(INPUT) --output $(OUTPUT) --unmatched $(UNMATCHED) --log-level $(LOG_LEVEL)
 
 stream:
 	$(PYTHON) src/main.py --mode stream --log-level $(LOG_LEVEL)
 
 retrain:
-	$(PYTHON) src/main.py --render-mode all --generate-sbert-data --log-level $(LOG_LEVEL)
+	$(PYTHON) src/main.py --render-mode all --generate-sbert-data --input $(INPUT) --output $(OUTPUT) --unmatched $(UNMATCHED) --log-level $(LOG_LEVEL)
 
 test:
 	$(PYTHON) -c "from sentence_transformers import SentenceTransformer; m = SentenceTransformer('all-MiniLM-L6-v2'); print(m.encode('hello')[:5])"
 
 freeze:
 	$(PIP) freeze > requirements.txt
-
-clean:
-	rm -rf __pycache__ env/ data/*.csv data/*.json
 
 similarity:
 	@read -p "Sentence 1: " s1; \
@@ -60,3 +60,18 @@ retrain-debug:
 
 clean:
 	rm -rf env data/*.csv data/*.json __pycache__ src/**/__pycache__ .pytest_cache
+
+# ---------- Nuke 'em Rico ----------
+reset:
+	@read -p "🚨 Are you sure you want to nuke? (y/n)" yn; \
+	if [ $$yn = "y" ]; then \
+		@echo "💥 Nuking environment and project data..."; \
+		rm -rf env data/*.csv data/*.json __pycache__ src/**/__pycache__ .pytest_cache; \
+		@echo "🧪 Recreating virtual environment..."; \
+		python3 -m venv env; \
+		env/bin/pip install --upgrade pip; \
+		env/bin/pip install -r requirements.txt; \
+		@echo "✅ Reset complete. Fresh environment is ready to use."; \
+	else \
+		@echo "Cancelled."; \
+	fi
