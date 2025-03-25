@@ -1,0 +1,21 @@
+[INFO] 2025-03-24 19:06:24,551 - __main__ - ✅ Logging system initialized
+[INFO] 2025-03-24 19:06:24,551 - __main__ - Starting osai pipeline...
+[INFO] 2025-03-24 19:06:24,551 - __main__ - Mode: stream | Render mode: random | SBERT Data: False
+[INFO] 2025-03-24 19:06:24,551 - __main__ - 🌊 Stream mode selected. Waiting for NSJSON from standard input.
+[INFO] 2025-03-24 19:06:24,552 - templates.loader - 📄 Loading default template map.
+[INFO] 2025-03-24 19:06:24,552 - inputs.stream_reader - Listening for NDJSON input (Ctrl+D to end)...
+[INFO] 2025-03-24 19:06:41,807 - pipeline.stream_runner - 📝 Stream ended. 0 logs written to data/streamed_logs.csv
+[INFO] 2025-03-24 19:07:20,835 - __main__ - ✅ Logging system initialized
+[INFO] 2025-03-24 19:07:20,835 - __main__ - Starting osai pipeline...
+[INFO] 2025-03-24 19:07:20,835 - __main__ - Mode: stream | Render mode: random | SBERT Data: False
+[INFO] 2025-03-24 19:07:20,835 - __main__ - 🌊 Stream mode selected. Waiting for NSJSON from standard input.
+[INFO] 2025-03-24 19:07:20,836 - templates.loader - 📄 Loading default template map.
+[INFO] 2025-03-24 19:07:20,836 - inputs.stream_reader - Listening for NDJSON input (Ctrl+D to end)...
+[INFO] 2025-03-24 19:07:20,836 - pipeline.stream_runner - 📝 Stream ended. 0 logs written to data/streamed_logs.csv
+[INFO] 2025-03-24 19:07:35,878 - __main__ - ✅ Logging system initialized
+[INFO] 2025-03-24 19:07:35,879 - __main__ - Starting osai pipeline...
+[INFO] 2025-03-24 19:07:35,879 - __main__ - Mode: stream | Render mode: random | SBERT Data: False
+[INFO] 2025-03-24 19:07:35,879 - __main__ - 🌊 Stream mode selected. Waiting for NSJSON from standard input.
+[INFO] 2025-03-24 19:07:35,879 - templates.loader - 📄 Loading default template map.
+[INFO] 2025-03-24 19:07:35,880 - inputs.stream_reader - Listening for NDJSON input (Ctrl+D to end)...
+[INFO] 2025-03-24 19:07:35,880 - pipeline.stream_runner - 📝 Stream ended. 0 logs written to data/streamed_logs.csv

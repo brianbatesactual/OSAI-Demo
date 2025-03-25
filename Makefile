@@ -3,6 +3,8 @@ VENV_DIR := env
 PYTHON := $(VENV_DIR)/bin/python
 PIP := $(VENV_DIR)/bin/pip
 LOG_LEVEL ?= INFO
+LOG_FILE ?=
+RENDER_MODE ?= random
 INPUT ?= data/input_logs.json
 OUTPUT ?= data/processed_logs.csv
 UNMATCHED ?= data/unmatched_logs.json
@@ -30,10 +32,23 @@ setup:
 	$(PIP) install -r requirements.txt
 
 run:
-	$(PYTHON) src/main.py --render-mode random --input $(INPUT) --output $(OUTPUT) --unmatched $(UNMATCHED) --log-level $(LOG_LEVEL)
+	$(PYTHON) src/main.py \
+		--mode file \
+		--render-mode all \
+		--input $(INPUT) \
+		--output $(OUTPUT) \
+		--unmatched $(UNMATCHED) \
+		--log-level $(LOG_LEVEL) \
+		$(if $(LOG_FILE),--log-file $(LOG_FILE),)
 
 stream:
-	$(PYTHON) src/main.py --mode stream --log-level $(LOG_LEVEL)
+	$(PYTHON) src/main.py \
+		--mode stream \
+		--render-mode $(RENDER_MODE) \
+		--output $(OUTPUT) \
+		--unmatched $(UNMATCHED) \
+		--log-level $(LOG_LEVEL) \
+		$(if $(LOG_FILE),--log-file $(LOG_FILE),)
 
 retrain:
 	$(PYTHON) src/main.py \
@@ -66,6 +81,10 @@ run-debug:
 
 retrain-debug:
 	make retrain LOG_LEVEL=debug
+
+tail:
+	@echo "📜 Tailing latest log file..."
+	tail -f logs/$$(ls -t logs/* | head -n 1)
 
 clean:
 	rm -rf env data/*.csv data/*.json __pycache__ src/**/__pycache__ .pytest_cache

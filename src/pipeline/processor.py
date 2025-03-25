@@ -2,6 +2,7 @@
 
 import logging
 from templates.tmanager import TManager
+from templates.loader import load_template_map
 # from outputs.file_writer import write_to_csv, write_to_json
 from utils.file_handler import write_to_csv, write_to_json
 # from outputs.sbert_writer import write_sbert_pairs
@@ -19,19 +20,9 @@ def process_logs(logs, output_csv, unmatched_json, render_mode='random', generat
     unmatched_logs = []
     sbert_pairs = []
 
-    template_map = {
-        'Dialog Logon': 'dialog_logon',
-        # 'Other Events': 'other_events_template.txt',
-        # 'Report Start': 'report_start_template.txt',
-        # 'RFC Call': 'rfc_call_template.txt',
-        # 'RFC/CPIC Logon': 'rfc_cpic_logon_template.txt',
-        # 'RFC Function Call': 'rfc_function_call_template.txt',
-        # 'System Events': 'system_events_template.txt',
-        # 'Transaction Start': 'transaction_start_template.txt',
-        # 'User Master Changes': 'user_master_changes_template.txt',
-        
-        # Map other TXSUBCLSID values to their templates
-    }
+    template_map = load_template_map()
+    logger.debug(f"🧭 Template map loaded: {list(template_map.keys())}")
+
 
     for log_entry in logs:
         # context = {key: log_entry.get(key, 'N/A') for key in [

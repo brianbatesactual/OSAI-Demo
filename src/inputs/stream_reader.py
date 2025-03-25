@@ -1,7 +1,7 @@
 import sys
 import json
-from utils.logger import setup_logger
-logger = setup_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 def read_from_stdin():
     logger.info("Listening for NDJSON input (Ctrl+D to end)...")

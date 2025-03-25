@@ -1,9 +1,9 @@
 from jinja2 import Environment, FileSystemLoader
 import os
 import random
-from utils.logger import setup_logger
+import logging
 
-logger = setup_logger(__name__)
+logger = logging.getLogger(__name__)
 
 class TManager:
     def __init__(self, template_dir=None):

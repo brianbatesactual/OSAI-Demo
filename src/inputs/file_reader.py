@@ -2,8 +2,8 @@
 
 import os
 import json
-from utils.logger import setup_logger
-logger = setup_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 def read_from_default_data(file_name='input_logs.json'):
     script_dir = os.path.dirname(os.path.abspath(__file__))
