@@ -1,0 +1,22 @@
+# Create the systemd service template for Qdrant
+service_template = """[Unit]
+Description=Qdrant Vector Search Engine
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/qdrant --config-path /etc/qdrant/config.yaml
+WorkingDirectory=/var/lib/qdrant
+Restart=always
+RestartSec=5
+LimitNOFILE=100000
+
+[Install]
+WantedBy=multi-user.target
+"""
+
+# Write to the appropriate template file
+path = "osai-demo/roles/qdrant_server/templates/qdrant.service.j2"
+with open(path, "w") as f:
+    f.write(service_template)
+
+"qdrant.service.j2 template created."

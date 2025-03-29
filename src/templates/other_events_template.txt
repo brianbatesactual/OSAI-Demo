@@ -1,1 +1,0 @@
-On {{ ALGDATE }} at {{ ALGTIME }}, user {{ ALGUSER }} from client {{ ALGCLIENT }} triggered an event: {{ ALGTEXT }} on system {{ ALGSYSTEM }}.

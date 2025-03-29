@@ -1,0 +1,12 @@
+# osai-demo/playbook.yml
+
+- name: Deploy Qdrant and/or Vatrix
+  hosts: all
+  become: true
+  vars:
+    deploy_qdrant: true
+    deploy_vatrix: true
+
+  roles:
+    - { role: qdrant_server, when: deploy_qdrant }
+    - { role: vatrix_receiver, when: deploy_vatrix }

@@ -1,0 +1,61 @@
+---
+- name: Ensure Python and venv dependencies are installed
+  apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-venv
+      - python3-setuptools
+      - python3-wheel
+    state: present
+    update_cache: yes
+
+- name: Ensure Vatrix user exists
+  user:
+    name: "{{ vatrix_app_user }}"
+    system: yes
+    create_home: no
+    shell: /usr/sbin/nologin
+
+- name: Create application and log directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ vatrix_app_user }}"
+    group: "{{ vatrix_app_user }}"
+    mode: '0755'
+  loop:
+    - "{{ vatrix_base_dir }}"
+    - "{{ vatrix_log_dir }}"
+
+- name: Set up Python virtual environment
+  pip:
+    virtualenv: "{{ vatrix_venv_path }}"
+    virtualenv_command: python3 -m venv
+    name:
+      - fastapi
+      - uvicorn[standard]
+      - httpx
+      - qdrant-client
+    state: present
+
+- name: Copy FastAPI app file
+  copy:
+    src: main.py
+    dest: "{{ vatrix_base_dir }}/main.py"
+    owner: "{{ vatrix_app_user }}"
+    group: "{{ vatrix_app_user }}"
+    mode: '0644'
+
+- name: Deploy systemd unit for Vatrix
+  template:
+    src: vatrix.service.j2
+    dest: /etc/systemd/system/vatrix.service
+    mode: '0644'
+
+- name: Reload systemd and start Vatrix service
+  systemd:
+    daemon_reload: yes
+    name: vatrix
+    enabled: yes
+    state: started

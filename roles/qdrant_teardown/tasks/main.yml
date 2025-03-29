@@ -1,0 +1,27 @@
+---
+# roles/qdrant_teardown/tasks/main.yml
+
+- name: Stop Qdrant container
+  community.docker.docker_container:
+    name: qdrant
+    state: stopped
+    force_kill: true
+  ignore_errors: true
+
+- name: Remove Qdrant container
+  community.docker.docker_container:
+    name: qdrant
+    state: absent
+  ignore_errors: true
+
+- name: Remove Qdrant image
+  community.docker.docker_image:
+    name: qdrant/qdrant:{{ qdrant_docker_version | default('latest') }}
+    state: absent
+  ignore_errors: true
+
+- name: Remove Qdrant volume directory
+  file:
+    path: /var/lib/qdrant
+    state: absent
+  ignore_errors: true

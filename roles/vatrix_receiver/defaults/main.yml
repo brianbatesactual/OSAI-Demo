@@ -1,0 +1,7 @@
+---
+vatrix_app_user: vatrix
+vatrix_base_dir: /opt/vatrix
+vatrix_venv_path: "{{ vatrix_base_dir }}/venv"
+vatrix_service_port: 8000
+vatrix_app_entrypoint: "main:app"  # Modify if your entry point is different
+vatrix_log_dir: /var/log/vatrix

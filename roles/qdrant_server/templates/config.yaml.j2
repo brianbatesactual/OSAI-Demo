@@ -1,0 +1,7 @@
+---
+log_level: INFO
+service:
+  http_port: {{ qdrant_service_port }}
+storage:
+  storage_path: "{{ qdrant_data_dir }}"
+  snapshot_path: "{{ qdrant_data_dir }}/snapshots"

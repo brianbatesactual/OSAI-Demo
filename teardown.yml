@@ -1,0 +1,6 @@
+- name: Remove Vatrix and Qdrant
+  hosts: all
+  become: yes
+  roles:
+    - vatrix_teardown
+    - qdrant_teardown

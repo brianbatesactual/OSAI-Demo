@@ -1,0 +1,90 @@
+- name: Install Docker dependencies
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+    state: present
+    update_cache: yes
+
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker APT repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+    state: present
+
+- name: Install Docker
+  apt:
+    name: [ docker-ce, docker-ce-cli, containerd.io ]
+    state: present
+    update_cache: yes
+
+- name: Ensure python3-pip is installed
+  apt:
+    name: python3-pip
+    state: present
+    update_cache: yes
+
+- name: Ensure setuptools and wheel are installed
+  apt:
+    name:
+      - python3-setuptools
+      - python3-wheel
+    state: present
+
+- name: Install Python Docker SDK (docker-py)
+  pip:
+    name: docker
+    executable: pip3 
+
+- name: Ensure Docker service is running
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Pull Qdrant Docker image
+  community.docker.docker_image:
+    name: qdrant/qdrant:{{ qdrant_docker_version }}
+    source: pull
+
+- name: Stop existing Qdrant container (if running)
+  community.docker.docker_container:
+    name: qdrant
+    state: stopped
+  ignore_errors: true
+
+- name: Remove existing Qdrant container (if present)
+  community.docker.docker_container:
+    name: qdrant
+    state: absent
+    force_kill: true
+  ignore_errors: true
+
+- name: Run Qdrant container
+  community.docker.docker_container:
+    name: qdrant
+    image: qdrant/qdrant:{{ qdrant_docker_version }}
+    state: started
+    restart_policy: always
+    published_ports:
+      - "6333:6333"
+    volumes:
+      - /var/lib/qdrant:/qdrant/storage
+
+- name: Wait for Qdrant container to become available
+  uri:
+    url: http://localhost:6333/healthz
+    method: GET
+    status_code: 200
+    timeout: 5
+  register: qdrant_health
+  retries: 5
+  delay: 3
+  until: qdrant_health.status == 200
