@@ -1,1 +1,4 @@
 # Global variables
+qdrant_docker_version: v1.7.3
+qdrant_gateway_compose_path: /opt/vatrix_stack
+deploy_qdrant: true

@@ -1,6 +1,6 @@
-- name: Remove Vatrix and Qdrant
+# osai-demo/teardown.yml
+- name: Teardown Qdrant + Vatrix Gateway
   hosts: all
-  become: yes
+  become: true
   roles:
-    - vatrix_teardown
     - qdrant_teardown
