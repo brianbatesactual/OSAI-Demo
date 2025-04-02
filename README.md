@@ -4,6 +4,7 @@ An Ansible-driven infrastructure template to deploy and validate an on-prem stac
 
 - 🧠 **Qdrant** — a high-performance vector database (Docker-based)
 - 🔌 **Vatrix Receiver** — a FastAPI endpoint for Vatrix NLP Processor
+- 🔌 **Vatrix Gateway** — a FastAPI-based API for Vatrix NLP Processor (Docker-based)
 - 🧪 **Post-install test script** to validate end-to-end vector indexing and search
 
 ---
@@ -45,6 +46,12 @@ This will:
 - Deploy Qdrant as a container on port 6333
 - Set up Vatrix under /opt/vatrix with a virtualenv and systemd unit on port 8000
 - Validate Qdrant is healthy
+- Install Docker & Dependencies
+- Deploy Qdrant as a container on port 6334
+- Build Vatrix Gateway
+- Set up Vatrix Gateway as a container on port 8000
+- Validate stack is healthy
+- Tests /ingest and /search APIs
 
 ---
 
@@ -56,6 +63,7 @@ make test
 
 This will:
 - Wait for Vatrix (FastAPI) to become available
+- Wait for Vatrix Gateway to become available
 - Push a synthetic 384-dim vector to Qdrant
 - Search and return the result
 
@@ -71,6 +79,7 @@ make destroy
 This removes:
 - Qdrant container and image
 - Vatrix app, logs, virtualenv, and systemd unit
+- Vatrix Gateway container and image
 
 ---
 
@@ -82,7 +91,7 @@ osai-demo/
 ├── teardown.yml           # Full stack teardown
 ├── inventory/             # Hosts and variable overrides
 ├── roles/                 # Ansible roles (deploy + teardown)
-├── scripts/test_post_install.sh
+├── scripts/
 ```
 
 ---
