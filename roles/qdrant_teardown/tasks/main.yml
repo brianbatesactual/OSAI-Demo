@@ -1,27 +1,22 @@
----
 # roles/qdrant_teardown/tasks/main.yml
 
-- name: Stop Qdrant container
-  community.docker.docker_container:
-    name: qdrant
-    state: stopped
-    force_kill: true
-  ignore_errors: true
-
-- name: Remove Qdrant container
-  community.docker.docker_container:
-    name: qdrant
+- name: Stop and remove Qdrant + Vatrix Gateway Docker stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ qdrant_gateway_compose_path }}"
     state: absent
+    remove_images: all
+    remove_volumes: true
+    remove_orphans: true
+  register: teardown_result
   ignore_errors: true
 
-- name: Remove Qdrant image
-  community.docker.docker_image:
-    name: qdrant/qdrant:{{ qdrant_docker_version | default('latest') }}
-    state: absent
-  ignore_errors: true
+- name: Print teardown result (if any)
+  debug:
+    var: teardown_result
+  when: teardown_result is defined and teardown_result.stdout is defined
 
-- name: Remove Qdrant volume directory
+- name: Ensure Docker Compose directory is removed
   file:
-    path: /var/lib/qdrant
+    path: "{{ qdrant_gateway_compose_path }}"
     state: absent
   ignore_errors: true

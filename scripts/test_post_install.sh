@@ -1,24 +1,74 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
-echo "Waiting for Vatrix service to come up on port 8000..."
-until curl -s http://10.0.1.159:8000/docs > /dev/null; do
+# Extract first ansible_host from inventory
+HOST=$(awk '/ansible_host=/{print $2}' inventory/hosts.ini | head -n 1 | cut -d= -f2)
+PORT="${2:-8000}"
+URL="http://${HOST}:${PORT}"
+
+echo "📡 Target: ${URL}"
+
+# Wait for Gateway to respond
+echo "Waiting for Vatrix Gateway service to come up on ${URL}..."
+until curl -s "${URL}/docs" > /dev/null; do
   sleep 1
 done
 
-echo "✅ FastAPI is up"
+echo "✅ Vatrix Gateway is up"
 
+# Generate a valid 384-dim vector
 VECTOR=$(python3 -c 'import json; print(json.dumps([0.1, 0.2, 0.3, 0.4, 0.5] + [0.0]*379))')
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+UUID=$(python3 -c 'import uuid; print(uuid.uuid4())')
 
-echo "Sending test /add_log payload..."
-curl -s -X POST http://10.0.1.159:8000/add_log/ \
-  -H "Content-Type: application/json" \
-  -d "{\"log_id\": 1, \"vector\": $VECTOR, \"payload\": {\"log_text\": \"Sample log from test script\"}}" | jq .
+TMPFILE=$(mktemp /tmp/vatrix-test.XXXXXX).json
 
-echo "Sending test /search_logs query..."
-curl -s -X POST http://10.0.1.159:8000/search_logs/ \
+python3 -c "
+import json
+with open('$TMPFILE', 'w') as f:
+    json.dump({
+        'project': 'osai-demo',
+        'entries': [{
+            'id': '$UUID',
+            'vector': $VECTOR,
+            'payload': {
+                'log_text': 'This is a test log sent via post-install script',
+                'test_flag': 'true'
+            },
+            'timestamp': '$TIMESTAMP'
+        }]
+    }, f)
+"
+
+dos2unix "$TMPFILE" 2>/dev/null || true
+
+# Debug print payload, uncomment below two lines to enable
+# echo "Payload:"
+# cat "$TMPFILE" | jq .
+
+# Testing ingest pipeline
+echo "🚀 Sending test /api/v1/ingest payload..."
+
+RESPONSE=$(curl -s -X POST "${URL}/api/v1/ingest" \
   -H "Content-Type: application/json" \
-  -d "{\"query_vector\": $VECTOR, \"top_k\": 1}" | jq .
+  --data @"$TMPFILE")
+
+echo "$RESPONSE" | jq .
+
+if ! echo "$RESPONSE" | jq -e '.status == "ok"' > /dev/null; then
+  echo "❌ Ingest failed!"
+  exit 1
+fi
+
+# Testing search API
+echo "🔍 Sending test /api/v1/search query..."
+
+SEARCH_OUTPUT=$(curl -s -X POST "${URL}/api/v1/search" \
+  -H "Content-Type: application/json" \
+  -d "{\"query_vector\": $VECTOR, \"top_k\": 1}")
+
+echo "$SEARCH_OUTPUT" | jq .
 
 echo "✅ Test complete"
+exit 0
