@@ -3,7 +3,7 @@
 An Ansible-driven infrastructure template to deploy and validate an on-prem stack consisting of:
 
 - 🧠 **Qdrant** — a high-performance vector database (Docker-based)
-- 🔌 **Vatrix Receiver** — a FastAPI endpoint for Vatrix NLP Processor
+- 🔌 **Vatrix Gateway** — a FastAPI endpoint for Vatrix NLP Processor
 - 🧪 **Post-install test script** to validate end-to-end vector indexing and search
 
 ---
@@ -25,7 +25,7 @@ Edit `inventory/hosts.ini` with your target host:
 [qdrant]
 lan-test ansible_host=192.168.1.1 ansible_user=ubuntu
 
-[vatrix]
+[vatrix_gateway]
 lan-test ansible_host=192.168.1.1 ansible_user=ubuntu
 
 [all:vars]
@@ -43,7 +43,7 @@ make deploy
 This will:
 - Install Docker
 - Deploy Qdrant as a container on port 6333
-- Set up Vatrix under /opt/vatrix with a virtualenv and systemd unit on port 8000
+- Set up Vatrix Gateway under /opt/vatrix_gateway with a virtualenv and systemd unit on port 8000
 - Validate Qdrant is healthy
 
 ---
@@ -55,7 +55,7 @@ make test
 ```
 
 This will:
-- Wait for Vatrix (FastAPI) to become available
+- Wait for Vatrix Gateway (FastAPI) to become available
 - Push a synthetic 384-dim vector to Qdrant
 - Search and return the result
 
@@ -70,7 +70,7 @@ make destroy
 
 This removes:
 - Qdrant container and image
-- Vatrix app, logs, virtualenv, and systemd unit
+- Vatrix Gateway, logs, virtualenv, and systemd unit
 
 ---
 
@@ -89,10 +89,11 @@ osai-demo/
 
 ## 🛠 Future Plans
 
-- Dockerize Vatrix for full container parity
+- Dockerize Vatrix Gateway for full container parity
 - TLS/Nginx reverse proxy for hardened deployments
 - make deploy / make destroy CLI workflow
 - Pro edition features (auth, cloud support, etc.)
+- ⚠️ Stack uses docker-compose file format 3.3 for compatibility with older Docker Compose versions. You may upgrade to 3.9+ with the newer docker compose CLI plugin.
 
 ---
 
