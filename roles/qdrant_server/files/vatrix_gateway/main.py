@@ -1,6 +1,6 @@
 # vatrix_gateway/main.py
 
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Request, HTTPException, status
 from pydantic import BaseModel, Field
 from typing import List, Dict
 from datetime import datetime
@@ -11,11 +11,30 @@ import os, logging
 import time
 
 
-app = FastAPI(title="Vatrix Gateway API", version="0.1.0")
+app = FastAPI(title="Vatrix Gateway API", version="0.1.1")
 logging.basicConfig(level=logging.INFO)
 
 COLLECTION_NAME = "vatrix_gateway_logs"
 qdrant = None
+
+API_TOKEN = os.getenv("API_TOKEN")
+
+@app.middleware("http")
+async def token_auth_middleware(request: Request, call_next):
+    if request.url.path.startswith("/api/") and API_TOKEN:
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Missing or malformed Authorization header",
+            )
+        token = auth_header.split(" ")[1]
+        if token != API_TOKEN:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Invalid API token",
+            )
+    return await call_next(request)
 
 # ------------------------------
 # Qdrant Setup

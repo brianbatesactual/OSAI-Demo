@@ -31,6 +31,7 @@ services:
     environment:
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6334
+      - API_TOKEN=changeme123
     depends_on:
       qdrant:
         condition: service_healthy

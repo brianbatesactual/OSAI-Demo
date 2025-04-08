@@ -49,6 +49,8 @@ This will:
 - Validate stack is healthy
 - Tests /ingest and /search APIs
 
+Change your token!
+
 ---
 
 ## 🧪 Running the Post-Install Test

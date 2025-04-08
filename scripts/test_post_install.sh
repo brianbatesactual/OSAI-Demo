@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# Make sure to set you token
+AUTH_HEADER="Authorization: Bearer changeme123"
+
 # Extract first ansible_host from inventory
 HOST=$(awk '/ansible_host=/{print $2}' inventory/hosts.ini | head -n 1 | cut -d= -f2)
 
@@ -63,6 +66,7 @@ dos2unix "$TMPFILE" 2>/dev/null || true
 echo "🚀 Sending test /api/v1/ingest payload..."
 
 RESPONSE=$(curl -s -X POST "${URL}/api/v1/ingest" \
+  -H "Authorization: Bearer changeme123" \
   -H "Content-Type: application/json" \
   --data @"$TMPFILE")
 
@@ -77,6 +81,7 @@ fi
 echo "🔍 Sending test /api/v1/search query..."
 
 SEARCH_OUTPUT=$(curl -s -X POST "${URL}/api/v1/search" \
+  -H "Authorization: Bearer changeme123" \
   -H "Content-Type: application/json" \
   -d "{\"query_vector\": $VECTOR, \"top_k\": 1}")
 
