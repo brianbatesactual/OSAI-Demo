@@ -48,7 +48,7 @@
 
 - name: Create directory for Docker Compose stack
   file:
-    path: "{{ qdrant_gateway_compose_path }}"
+    path: "{{ deploy_dir }}"
     state: directory
     owner: root
     group: root
@@ -57,15 +57,27 @@
 - name: Copy Docker Compose template
   template:
     src: docker-compose.yml.j2
-    dest: "{{ qdrant_gateway_compose_path }}/docker-compose.yml"
+    dest: "{{ deploy_dir }}/docker-compose.yml"
     owner: root
     group: root
     mode: "0644"
 
+- name: Copy docker-compose.nginx.yml if enabled
+  template:
+    src: docker-compose.nginx.yml.j2
+    dest: "{{ deploy_dir }}/docker-compose.nginx.yml"
+  when: enable_nginx | default(false)
+
+- name: Copy nginx.conf if enabled
+  template:
+    src: nginx.conf.j2
+    dest: "{{ deploy_dir }}/nginx.conf"
+  when: enable_nginx | default(false)
+
 - name: Copy Vatrix Gateway source code for build context
   copy:
     src: "{{ playbook_dir }}/roles/qdrant_server/files/vatrix_gateway/"
-    dest: "{{ qdrant_gateway_compose_path }}/vatrix_gateway/"
+    dest: "{{ deploy_dir }}/vatrix_gateway/"
     remote_src: no
   notify: Rebuild Docker Compose stack
 
@@ -83,8 +95,21 @@
 
 - name: Start Docker Compose stack (v2 CLI mode)
   community.docker.docker_compose_v2:
-    project_src: "{{ qdrant_gateway_compose_path }}"
+    project_src: "{{ deploy_dir }}"
+    files:
+      - docker-compose.yml
+      - docker-compose.nginx.yml
     state: present
     build: always
     remove_orphans: true
     recreate: always
+  when: enable_nginx | default(false)
+
+- name: Start Docker Compose stack (v2 CLI mode, no nginx)
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_dir }}"
+    state: present
+    build: always
+    remove_orphans: true
+    recreate: always
+  when: not enable_nginx | default(false)

@@ -2,13 +2,30 @@
 
 - name: Stop and remove Qdrant + Vatrix Gateway Docker stack
   community.docker.docker_compose_v2:
-    project_src: "{{ qdrant_gateway_compose_path }}"
+    project_src: "{{ deploy_dir }}"
     state: absent
     remove_images: all
     remove_volumes: true
     remove_orphans: true
   register: teardown_result
   ignore_errors: true
+
+- name: Stop and remove NGINX container (if exists)
+  shell: |
+    docker ps -a --format '{{ "{{.Names}}" }}' | grep -q '^vatrix-nginx$' && docker rm -f vatrix-nginx || true
+  ignore_errors: true
+
+- name: Remove nginx.conf if deployed
+  file:
+    path: "{{ deploy_dir }}/nginx.conf"
+    state: absent
+  when: enable_nginx | default(false)
+
+- name: Remove docker-compose.nginx.yml if deployed
+  file:
+    path: "{{ deploy_dir }}/docker-compose.nginx.yml"
+    state: absent
+  when: enable_nginx | default(false)
 
 - name: Print teardown result (if any)
   debug:
@@ -17,6 +34,6 @@
 
 - name: Ensure Docker Compose directory is removed
   file:
-    path: "{{ qdrant_gateway_compose_path }}"
+    path: "{{ deploy_dir }}"
     state: absent
   ignore_errors: true

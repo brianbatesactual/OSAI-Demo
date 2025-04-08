@@ -6,6 +6,7 @@ An Ansible-driven infrastructure template to deploy and validate an on-prem stac
 
 - 🧠 **Qdrant** — a high-performance vector database (Docker-based)
 - 🔌 **Vatrix Gateway** — a FastAPI-based API for Vatrix NLP Processor (Docker-based)
+- 🌐 **NGINX** - a reverse proxy in front of Vatrix Gateway (optional)
 - 🧪 **Post-install test script** to validate end-to-end vector indexing and search
 
 ---
@@ -41,6 +42,7 @@ make deploy
 
 This will:
 - Install Docker & Dependencies
+- Deploy NGINX as a container on port 80 (optional: "make deploy enable_nginx=true")
 - Deploy Qdrant as a container on port 6334
 - Build Vatrix Gateway
 - Set up Vatrix Gateway as a container on port 8000
@@ -56,7 +58,8 @@ make test
 ```
 
 This will:
-- Wait for Vatrix Gateway to become available
+- Wait for NGINX to become available, if enabled
+- Test for Vatrix Gateway to be available
 - Push a synthetic 384-dim vector to Qdrant
 - Search and return the result
 
@@ -70,6 +73,7 @@ make destroy
 ```
 
 This removes:
+- NGINX container and image (if applicable)
 - Qdrant container and image
 - Vatrix Gateway container and image
 
@@ -90,7 +94,6 @@ osai-demo/
 
 ## 🛠 Future Plans
 
-- TLS/Nginx reverse proxy for hardened deployments
 - make deploy / make destroy CLI workflow
 - Pro edition features (auth, cloud support, etc.)
 - ⚠️ Stack uses docker-compose file format 3.3 for compatibility with older Docker Compose versions. You may upgrade to 3.9+ with the newer docker compose CLI plugin.

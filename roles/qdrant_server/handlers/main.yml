@@ -1,5 +1,5 @@
 - name: Rebuild Docker Compose stack
   community.docker.docker_compose_v2:
-    project_src: "{{ qdrant_gateway_compose_path }}"
+    project_src: "{{ deploy_dir }}"
     state: present
     build: always

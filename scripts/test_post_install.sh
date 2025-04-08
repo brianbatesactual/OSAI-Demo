@@ -4,7 +4,19 @@ set -euo pipefail
 
 # Extract first ansible_host from inventory
 HOST=$(awk '/ansible_host=/{print $2}' inventory/hosts.ini | head -n 1 | cut -d= -f2)
-PORT="${2:-8000}"
+
+# Try port 80 first
+if curl -s "http://${HOST}:80/docs" | grep -q "Vatrix" ; then
+  PORT=80
+  echo "🌐 NGINX is serving Vatrix Gateway — using port 80"
+elif curl -s "http://${HOST}:8000/docs" | grep -q "Vatrix" ; then
+  PORT=8000
+  echo "🚧 NGINX not found — falling back to port 8000"
+else
+  echo "❌ Vatrix Gateway not responding on expected ports"
+  exit 1
+fi
+
 URL="http://${HOST}:${PORT}"
 
 echo "📡 Target: ${URL}"
