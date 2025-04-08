@@ -3,4 +3,5 @@ qdrant_docker_version: v1.7.3
 deploy_dir: /opt/vatrix_stack
 deploy_qdrant: true
 enable_nginx: false
+enable_tls: false
 vatrix_gateway_host_port: 8000

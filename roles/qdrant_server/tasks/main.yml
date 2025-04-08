@@ -54,6 +54,12 @@
     group: root
     mode: "0755"
 
+- name: Ensure deploy directory exists
+  file:
+    path: "{{ deploy_dir }}"
+    state: directory
+    mode: "0755"
+
 - name: Copy Docker Compose template
   template:
     src: docker-compose.yml.j2
@@ -73,6 +79,17 @@
     src: nginx.conf.j2
     dest: "{{ deploy_dir }}/nginx.conf"
   when: enable_nginx | default(false)
+
+- name: Generate self-signed TLS certificate if enabled and not present
+  command: >
+    openssl req -x509 -nodes -days 365
+    -newkey rsa:2048
+    -keyout {{ deploy_dir }}/key.pem
+    -out {{ deploy_dir }}/cert.pem
+    -subj "/C=US/ST=Oregon/L=Portland/O=Vatrix/OU=Gateway/CN=localhost"
+  args:
+    creates: "{{ deploy_dir }}/cert.pem"
+  when: enable_tls | default(false)
 
 - name: Copy Vatrix Gateway source code for build context
   copy:

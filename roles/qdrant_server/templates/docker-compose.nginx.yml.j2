@@ -3,9 +3,16 @@ services:
   nginx:
     image: nginx:1.25-alpine
     container_name: vatrix-nginx
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - vatrix-gateway
+    volumes:
+{% if enable_tls | default(false) %}
+      - ./cert.pem:/etc/nginx/cert.pem:ro
+      - ./key.pem:/etc/nginx/key.pem:ro
+{% endif %}
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+{% if enable_tls | default(false) %}
+      - "443:443"
+{% endif %}

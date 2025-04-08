@@ -3,30 +3,36 @@
 set -euo pipefail
 
 # Make sure to set you token
-AUTH_HEADER="Authorization: Bearer changeme123"
+AUTH_TOKEN="${VATRIX_API_TOKEN:-changeme123}"
+AUTH_HEADER="Authorization: Bearer ${AUTH_TOKEN}"
 
 # Extract first ansible_host from inventory
 HOST=$(awk '/ansible_host=/{print $2}' inventory/hosts.ini | head -n 1 | cut -d= -f2)
 
-# Try port 80 first
-if curl -s "http://${HOST}:80/docs" | grep -q "Vatrix" ; then
-  PORT=80
-  echo "🌐 NGINX is serving Vatrix Gateway — using port 80"
-elif curl -s "http://${HOST}:8000/docs" | grep -q "Vatrix" ; then
-  PORT=8000
-  echo "🚧 NGINX not found — falling back to port 8000"
+USE_TLS=false
+PORT=8000
+
+# Detect if TLS is enabled by probing HTTPS first
+if curl -sk "https://${HOST}/docs" | grep -q "Vatrix"; then
+  USE_TLS=true
+  URL="https://${HOST}"
+  echo "🔒 TLS enabled — using HTTPS on port 443"
+elif curl -s "http://${HOST}/docs" | grep -q "Vatrix"; then
+  URL="http://${HOST}"
+  echo "🌐 NGINX without TLS — using HTTP on port 80"
+elif curl -s "http://${HOST}:8000/docs" | grep -q "Vatrix"; then
+  URL="http://${HOST}:8000"
+  echo "🚧 No NGINX — using FastAPI directly on port 8000"
 else
   echo "❌ Vatrix Gateway not responding on expected ports"
   exit 1
 fi
 
-URL="http://${HOST}:${PORT}"
-
 echo "📡 Target: ${URL}"
 
 # Wait for Gateway to respond
 echo "Waiting for Vatrix Gateway service to come up on ${URL}..."
-until curl -s "${URL}/docs" > /dev/null; do
+until curl -sk "${URL}/docs" > /dev/null; do
   sleep 1
 done
 
@@ -65,7 +71,7 @@ dos2unix "$TMPFILE" 2>/dev/null || true
 # Testing ingest pipeline
 echo "🚀 Sending test /api/v1/ingest payload..."
 
-RESPONSE=$(curl -s -X POST "${URL}/api/v1/ingest" \
+RESPONSE=$(curl -sk -X POST "${URL}/api/v1/ingest" \
   -H "Authorization: Bearer changeme123" \
   -H "Content-Type: application/json" \
   --data @"$TMPFILE")
@@ -80,7 +86,7 @@ fi
 # Testing search API
 echo "🔍 Sending test /api/v1/search query..."
 
-SEARCH_OUTPUT=$(curl -s -X POST "${URL}/api/v1/search" \
+SEARCH_OUTPUT=$(curl -sk -X POST "${URL}/api/v1/search" \
   -H "Authorization: Bearer changeme123" \
   -H "Content-Type: application/json" \
   -d "{\"query_vector\": $VECTOR, \"top_k\": 1}")
